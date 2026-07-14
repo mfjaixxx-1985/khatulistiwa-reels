@@ -1,0 +1,65 @@
+name: Generate & Publish Social Videos (FB & Bluesky)
+
+on:
+  schedule:
+    # Berjalan setiap hari jam 23:00 UTC (7:00 AM Malaysia Time)
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Bilangan video untuk dijana (Facebook)'
+        required: true
+        default: '30'
+      bsky_limit:
+        description: 'Bilangan video untuk dijana (Bluesky)'
+        required: true
+        default: '20'
+      offset:
+        description: 'Offset artikel dari pangkalan data'
+        required: true
+        default: '0'
+
+jobs:
+  generate-reels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # 6 jam — cukup untuk 50 video
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install system dependencies (FFmpeg & fonts)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Generate and Schedule Facebook Reels (Malay)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_TOKEN }}
+        run: |
+          LIMIT="${{ github.event.inputs.limit || '30' }}"
+          OFFSET="${{ github.event.inputs.offset || '0' }}"
+          npx tsx scripts/post-batch-reels.mjs --platform fb --limit $LIMIT --offset $OFFSET --schedule
+
+      - name: Generate and Post Bluesky Videos (English)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+        run: |
+          LIMIT="${{ github.event.inputs.bsky_limit || '20' }}"
+          OFFSET="${{ github.event.inputs.offset || '0' }}"
+          npx tsx scripts/post-batch-reels.mjs --platform bsky --limit $LIMIT --offset $OFFSET

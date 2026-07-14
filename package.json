@@ -1,0 +1,17 @@
+{
+  "name": "khatulistiwa-reels",
+  "version": "1.0.0",
+  "private": false,
+  "scripts": {
+    "generate": "npx tsx scripts/post-batch-reels.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
