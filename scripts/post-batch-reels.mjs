@@ -122,7 +122,7 @@ async function main() {
     process.exit(1);
   }
 
-  // 3) Tapis artikel yang belum dipost dan pastikan ada versi English jika platform = bsky
+  // 3) Tapis artikel yang belum dipost dan pastikan ada versi bahasa yang betul
   const articles = (allArticles || [])
     .filter(art => !postedIds.has(art.id))
     .filter(art => {
@@ -130,6 +130,11 @@ async function main() {
         if (art.lang === 'en') return true;
         const translations = art.ArticleTranslation || [];
         return translations.some(t => t.locale === 'en');
+      }
+      if (platform === 'fb') {
+        if (art.lang === 'ms') return true;
+        const translations = art.ArticleTranslation || [];
+        return translations.some(t => t.locale === 'ms');
       }
       return true;
     })
