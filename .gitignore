@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.local
+*.mp4
+*.json
+!meta.json
+!package.json
+!package-lock.json
+!tsconfig.json
